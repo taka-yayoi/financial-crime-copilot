@@ -1,0 +1,84 @@
+# Databricks App fcc-case-cockpit — execution evidence
+App: fcc-case-cockpit, deployed as a Databricks App  (FastAPI, resources/app.yml; resources: Lakebase postgres, SQL warehouse, Genie space)
+Calls below are authenticated HTTP requests to the deployed app (curl with a Databricks OAuth token).
+
+## POST /api/case/{alert_id}/disposition  — demo analyst actions, captured 2026-10-21 06:08 UTC
+SAR_FILED   (SAR narrative = AI draft reviewed by the analyst)
+{"disposition_id":1,"alert_id":"e87c363b-b5fa-4db0-adef-0833c8bfdf16","action":"SAR_FILED","created_at":"2026-10-21T06:08:02.273756+00:00"}
+ESCALATE
+{"disposition_id":2,"alert_id":"fa769d2f-5c22-489b-9283-fc4870127863","action":"ESCALATE","created_at":"2026-10-21T06:08:02.488251+00:00"}
+CLOSE_FALSE_POSITIVE x3 (top three LOW-band alerts)
+{"disposition_id":3,"alert_id":"85803a00-084e-440b-8e6b-f0c293fe3a29","action":"CLOSE_FALSE_POSITIVE","created_at":"2026-10-21T06:08:02.861646+00:00"}
+{"disposition_id":4,"alert_id":"fa475255-cea3-447f-a5f8-e5d896ea39e0","action":"CLOSE_FALSE_POSITIVE","created_at":"2026-10-21T06:08:03.045780+00:00"}
+{"disposition_id":5,"alert_id":"818a8b7c-d490-4bf2-b9a5-1321d524e870","action":"CLOSE_FALSE_POSITIVE","created_at":"2026-10-21T06:08:03.225297+00:00"}
+KPIs before the actions: {"alerts_total":2417,"high_priority":121,"high_untouched":121,"escalated":0,"sar_filed":0,"closed_false_positive":0}
+
+## GET /api/kpis  (captured 2026-10-21 06:26 UTC)
+{"alerts_total":2417,"high_priority":121,"high_untouched":119,"escalated":1,"sar_filed":1,"closed_false_positive":3}
+
+## GET /api/queue?limit=5  (open cases, priority order; the filed SAR is gone, the escalated case stays)
+#2   HIGH   0.9851  R2_HIGH_RISK_COUNTRY   Yuki Khan        $ 23,523.08  status=ESCALATE
+#3   HIGH   0.9837  R2_HIGH_RISK_COUNTRY   David Kim        $ 79,747.34  status=new
+#4   HIGH   0.9801  R2_HIGH_RISK_COUNTRY   Yuki Nguyen      $ 82,897.87  status=new
+#5   HIGH   0.98    R2_HIGH_RISK_COUNTRY   Linda Jones      $ 17,354.67  status=new
+#6   HIGH   0.9786  R2_HIGH_RISK_COUNTRY   Kenji Chen       $ 22,422.38  status=new
+
+## GET /api/case/fa769d2f-5c22-489b-9283-fc4870127863  (case detail: SHAP reasons, AI rationale, SAR draft, history)
+priority_rank: 2
+priority_band: HIGH
+priority_score: 0.9851
+rule_code: R2_HIGH_RISK_COUNTRY
+customer_name: Yuki Khan
+customer_country: SG
+kyc_risk_rating: MEDIUM
+is_pep: False
+top_reasons: high_risk_txn_amount (+0.15); distinct_cp_countries (+0.08); stddev_amount (+0.05)
+analyst_rationale: This alert scored high risk because rule R2_HIGH_RISK_COUNTRY triggered on $115,746.98 in high-risk-country transactions, with the model's top drivers being the high-risk transaction amount (+0.15), exposure to 10 distinct counterparty countries (+0.08), and elevated amount variability (+0.05), alongside $8,529.19 in cash credits.
+sar_draft:
+**DRAFT FOR ANALYST REVIEW**
+
+**Suspicious Activity Report Narrative**
+
+**1) Subject**
+Customer ID 164, holder of Account ID 100252. KYC risk rating: MEDIUM. The subject is not identified as a politically exposed person (PEP).
+
+**2) Suspicious Activity Summary**
+This report concerns activity flagged under rule R2_HIGH_RISK_COUNTRY, with a model priority score of 0.985. The account exhibited significant transactional exposure to high-risk jurisdictions and a broad geographic counterparty footprint inconsistent with the customer's MEDIUM risk profile.
+
+**3) Transaction Detail**
+During the review period, the account recorded 64 total transactions. Six transactions involved high-risk countries, aggregating USD 115,746.98. The triggering transaction was valued at USD 23,523.08; the largest single transaction was USD 23,779.22. Counterparties spanned 10 distinct countries. Additionally, 11 cash transactions were observed, with cash credits totaling USD 8,529.19.
+
+**4) Basis for Suspicion**
+The model's top risk drivers were high-risk transaction amount (+0.15), distinct counterparty countries (+0.08), and standard deviation of amount (+0.05). The concentration of high-value transfers to high-risk jurisdictions, dispersion across 10 counterparty countries, and variability in transaction amounts are inconsistent with the subject's MEDIUM KYC rating and suggest potential layering.
+
+**5) Recommended Action**
+Escalate for enhanced due diligence review of counterparty relationships and source of funds. Consider filing a SAR and evaluate account restrictions pending further investigation.
+
+*(Word count: approx. 210)*
+history: [{"action": "ESCALATE", "analyst": "takaaki.yayoi@databricks.com", "note": "Request source-of-funds documentation from relationship manager", "created_at": "2026-10-21T06:08:02.488251+00:00"}]
+
+## Error handling: unknown alert / invalid action
+{"detail":"alert not found"}
+invalid action -> HTTP 422
+
+## App log (startup + requests)
+2026-10-21T06:07:32Z [APP] INFO:     Application startup complete.
+2026-10-21T06:07:32Z [APP] INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-10-21T06:07:45Z [APP] INFO:     10.89.59.163:0 - "GET /api/kpis HTTP/1.1" 200 OK
+2026-10-21T06:07:45Z [APP] INFO:     10.120.61.90:0 - "GET /api/queue?limit=3 HTTP/1.1" 200 OK
+2026-10-21T06:08:02Z [APP] INFO:     10.106.69.21:0 - "GET /api/case/e87c363b-b5fa-4db0-adef-0833c8bfdf16 HTTP/1.1" 200 OK
+2026-10-21T06:08:02Z [APP] INFO:     10.89.59.163:0 - "POST /api/case/e87c363b-b5fa-4db0-adef-0833c8bfdf16/disposition HTTP/1.1" 200 OK
+2026-10-21T06:08:02Z [APP] INFO:     10.106.69.21:0 - "POST /api/case/fa769d2f-5c22-489b-9283-fc4870127863/disposition HTTP/1.1" 200 OK
+2026-10-21T06:08:02Z [APP] INFO:     10.106.67.89:0 - "GET /api/queue?band=LOW&limit=3 HTTP/1.1" 200 OK
+2026-10-21T06:08:02Z [APP] INFO:     10.106.64.120:0 - "POST /api/case/85803a00-084e-440b-8e6b-f0c293fe3a29/disposition HTTP/1.1" 200 OK
+2026-10-21T06:08:03Z [APP] INFO:     10.106.64.120:0 - "POST /api/case/fa475255-cea3-447f-a5f8-e5d896ea39e0/disposition HTTP/1.1" 200 OK
+2026-10-21T06:08:03Z [APP] INFO:     10.89.59.163:0 - "POST /api/case/818a8b7c-d490-4bf2-b9a5-1321d524e870/disposition HTTP/1.1" 200 OK
+2026-10-21T06:08:03Z [APP] INFO:     10.106.67.89:0 - "GET /api/kpis HTTP/1.1" 200 OK
+2026-10-21T06:11:53Z [APP] INFO:     10.89.54.44:0 - "POST /api/genie HTTP/1.1" 200 OK
+2026-10-21T06:12:07Z [APP] INFO:     10.89.51.154:0 - "POST /api/genie HTTP/1.1" 200 OK
+2026-10-21T06:12:25Z [APP] INFO:     10.88.60.9:0 - "POST /api/genie HTTP/1.1" 200 OK
+2026-10-21T06:26:45Z [APP] INFO:     10.120.63.64:0 - "GET /api/kpis HTTP/1.1" 200 OK
+2026-10-21T06:26:45Z [APP] INFO:     10.88.60.9:0 - "GET /api/queue?limit=5 HTTP/1.1" 200 OK
+2026-10-21T06:26:45Z [APP] INFO:     10.88.51.69:0 - "GET /api/case/fa769d2f-5c22-489b-9283-fc4870127863 HTTP/1.1" 200 OK
+2026-10-21T06:26:45Z [APP] INFO:     10.89.59.163:0 - "POST /api/case/does-not-exist/disposition HTTP/1.1" 404 Not Found
+2026-10-21T06:26:46Z [APP] INFO:     10.89.59.163:0 - "POST /api/case/fa769d2f-5c22-489b-9283-fc4870127863/disposition HTTP/1.1" 422 Unprocessable Entity

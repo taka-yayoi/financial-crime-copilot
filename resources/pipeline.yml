@@ -1,0 +1,15 @@
+# Lakeflow Spark Declarative Pipeline: raw CSV in a UC Volume -> bronze -> silver -> gold.
+resources:
+  pipelines:
+    aml_ingest:
+      name: fcc_aml_ingest
+      catalog: ${var.catalog}
+      schema: aml_bronze
+      serverless: true
+      channel: CURRENT
+      configuration:
+        landing_path: /Volumes/${var.catalog}/aml_bronze/landing
+      libraries:
+        - file: { path: ../sql/lakeflow/01_bronze.sql }
+        - file: { path: ../sql/lakeflow/02_silver.sql }
+        - file: { path: ../sql/lakeflow/03_gold.sql }

@@ -1,0 +1,11 @@
+# End-to-end job run — fcc_end_to_end (Declarative Automation Bundle, serverless)
+job_id=1043160203618599  run_id=887107306612211  state=TERMINATED/SUCCESS
+start=2026-10-21 06:12:45 UTC  end=2026-10-21 06:19:00 UTC
+
+task                       result    start                    end                     
+lakeflow_ingest            SUCCESS   2026-10-21 06:12:45 UTC  2026-10-21 06:13:48 UTC 
+unity_catalog_governance   SUCCESS   2026-10-21 06:13:48 UTC  2026-10-21 06:14:25 UTC 
+ml_alert_scoring           SUCCESS   2026-10-21 06:14:25 UTC  2026-10-21 06:15:49 UTC 
+genai_sar_drafts           SUCCESS   2026-10-21 06:15:49 UTC  2026-10-21 06:18:11 UTC 
+build_case_queue           SUCCESS   2026-10-21 06:18:12 UTC  2026-10-21 06:18:26 UTC 
+sync_to_lakebase           SUCCESS   2026-10-21 06:18:27 UTC  2026-10-21 06:18:59 UTC 

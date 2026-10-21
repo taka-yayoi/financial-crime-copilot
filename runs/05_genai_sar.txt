@@ -1,0 +1,89 @@
+# Gen AI — SAR drafts + analyst rationale (databricks-claude-opus-4-8 via ai_query)
+# Human-in-the-loop drafts for HIGH-priority alerts. Not auto-filed.
+
+drafts generated: 121
+drafted cases that are truly suspicious (ground truth): 103/121
+
+==============================================================================
+CASE 1  alert_id=e87c363b-b5fa-4db0-adef-0833c8bfdf16  rule=R2_HIGH_RISK_COUNTRY  score=0.987
+------------------------------------------------------------------------------
+ANALYST RATIONALE:
+This alert scored high risk because it triggered rule R2_HIGH_RISK_COUNTRY on $66,068.12 in high-risk-country transactions, with the model driven primarily by high-risk transaction amount (+0.16), counterparty spread across 7 distinct countries (+0.08), and transaction amount variability (+0.05).
+
+SAR DRAFT:
+**DRAFT FOR ANALYST REVIEW**
+
+**Suspicious Activity Report Narrative**
+
+**1) Subject**
+Customer ID 192, holder of account ID 100295. KYC risk rating is LOW. The subject is not identified as a politically exposed person (PEP).
+
+**2) Suspicious Activity Summary**
+Activity on account 100295 was flagged under rule R2_HIGH_RISK_COUNTRY and received a model priority score of 0.987. The account exhibited transactions involving high-risk jurisdictions and a broad range of counterparty countries inconsistent with the customer's LOW KYC risk rating.
+
+**3) Transaction Detail**
+During the review period the account recorded 62 total transactions. Four transactions involved high-risk countries, totaling USD 66,068.12, including a triggering transaction of USD 20,387.82. The largest single transaction was USD 20,641.32. Counterparties spanned 7 distinct countries. The account also recorded 11 cash transactions with cash credits totaling USD 8,092.23.
+
+**4) Basis for Suspicion**
+The model's top risk drivers were high-risk transaction amount (+0.16), distinct counterparty countries (+0.08), and standard deviation of amount (+0.05). The volume and value of high-risk country transactions, the diversity of 7 counterparty countries, and cash credit activity are inconsistent with the subject's LOW KYC risk profile and warrant further review.
+
+**5) Recommended Action**
+Escalate for enhanced due diligence. Review counterparty relationships, source of funds for high-risk country and cash activity, and reassess KYC risk rating.
+
+**DRAFT FOR ANALYST REVIEW**
+
+==============================================================================
+CASE 2  alert_id=fa769d2f-5c22-489b-9283-fc4870127863  rule=R2_HIGH_RISK_COUNTRY  score=0.985
+------------------------------------------------------------------------------
+ANALYST RATIONALE:
+This alert scored high risk because rule R2_HIGH_RISK_COUNTRY triggered on $115,746.98 in high-risk-country transactions, with the model's top drivers being the high-risk transaction amount (+0.15), exposure to 10 distinct counterparty countries (+0.08), and elevated amount variability (+0.05), alongside $8,529.19 in cash credits.
+
+SAR DRAFT:
+**DRAFT FOR ANALYST REVIEW**
+
+**Suspicious Activity Report Narrative**
+
+**1) Subject**
+Customer ID 164, holder of Account ID 100252. KYC risk rating: MEDIUM. The subject is not identified as a politically exposed person (PEP).
+
+**2) Suspicious Activity Summary**
+This report concerns activity flagged under rule R2_HIGH_RISK_COUNTRY, with a model priority score of 0.985. The account exhibited significant transactional exposure to high-risk jurisdictions and a broad geographic counterparty footprint inconsistent with the customer's MEDIUM risk profile.
+
+**3) Transaction Detail**
+During the review period, the account recorded 64 total transactions. Six transactions involved high-risk countries, aggregating USD 115,746.98. The triggering transaction was valued at USD 23,523.08; the largest single transaction was USD 23,779.22. Counterparties spanned 10 distinct countries. Additionally, 11 cash transactions were observed, with cash credits totaling USD 8,529.19.
+
+**4) Basis for Suspicion**
+The model's top risk drivers were high-risk transaction amount (+0.15), distinct counterparty countries (+0.08), and standard deviation of amount (+0.05). The concentration of high-value transfers to high-risk jurisdictions, dispersion across 10 counterparty countries, and variability in transaction amounts are inconsistent with the subject's MEDIUM KYC rating and suggest potential layering.
+
+**5) Recommended Action**
+Escalate for enhanced due diligence review of counterparty relationships and source of funds. Consider filing a SAR and evaluate account restrictions pending further investigation.
+
+*(Word count: approx. 210)*
+
+==============================================================================
+CASE 3  alert_id=e486a4ea-793c-4d8c-b305-8fa277eed5da  rule=R2_HIGH_RISK_COUNTRY  score=0.984
+------------------------------------------------------------------------------
+ANALYST RATIONALE:
+This alert triggered rule R2_HIGH_RISK_COUNTRY and scored high risk primarily due to $88,303.64 in transactions involving high-risk countries (model driver +0.17), compounded by activity spanning 4 distinct counterparty countries (+0.06) and elevated transaction amount variability (stddev +0.05), alongside $8,156.28 in cash credits.
+
+SAR DRAFT:
+**DRAFT FOR ANALYST REVIEW**
+
+**Suspicious Activity Report — Narrative**
+
+**1) Subject**
+Customer ID 1443, associated with Account ID 102181. KYC risk rating: HIGH. Politically exposed person status: No.
+
+**2) Suspicious Activity Summary**
+The account was flagged under rule R2_HIGH_RISK_COUNTRY and received a model priority score of 0.984. Activity involves transactions with high-risk jurisdictions and funds flow inconsistent with expected profile. The primary model risk drivers were high_risk_txn_amount (+0.17), distinct_cp_countries (+0.06), and stddev_amount (+0.05).
+
+**3) Transaction Detail**
+Across 51 total transactions, the subject conducted 2 transactions involving high-risk countries totaling USD 88,303.64. The triggering transaction was USD 79,747.34, and the largest observed transaction was USD 91,740.16. Counterparties spanned 4 distinct countries. The account also recorded 10 cash transactions totaling USD 8,156.28 in cash credits.
+
+**4) Basis for Suspicion**
+The combination of a HIGH KYC risk rating, exposure to high-risk jurisdictions, large-value transfers, variability in transaction amounts, and counterparties across multiple countries elevates money laundering risk. The elevated model priority score (0.984) and high-value high-risk-country activity support further scrutiny.
+
+**5) Recommended Action**
+File SAR and refer to the investigations team for enhanced due diligence. Consider transaction monitoring continuation, review of counterparty relationships, and evaluation of account restrictions pending findings.
+
+**END — DRAFT FOR ANALYST REVIEW**

@@ -1,0 +1,30 @@
+# Lakeflow ingest — execution evidence
+Pipeline: fcc_aml_ingest (Spark Declarative Pipeline, serverless, SQL; resources/pipeline.yml)
+pipeline_id c4ae0eeb-3b03-44f4-ab0b-603ecfff2888
+Latest update 5e7a8b90-1829-4bb3-92ae-13766d74d7c6 (task lakeflow_ingest of job run 887107306612211): COMPLETED
+Source: CSV files in UC Volume /Volumes/serverless_stable_unstructured_catalog/aml_bronze/landing/<table>/
+
+## Row counts (bronze -> silver -> gold)
+table                        rows
+bronze.customers            2,000
+bronze.accounts             3,011
+bronze.transactions       128,302
+bronze.alerts               2,417
+silver.customers            2,000
+silver.accounts             3,011
+silver.transactions       128,302
+silver.alerts               2,417
+gold.account_txn_features   3,011
+gold.alert_features         2,417
+gold.alert_kpis               626   (one row per alert_date x rule_code)
+
+## Data-quality expectations (from the pipeline event log, all updates)
+flow                  expectation        passed    failed
+silver.accounts       valid_account       3,011         0
+silver.alerts         positive_trigger    2,417         0
+silver.alerts         valid_alert         2,417         0
+silver.customers      valid_customer      2,000         0
+silver.customers      valid_risk          2,000         0
+silver.transactions   positive_amount   128,302         0
+silver.transactions   valid_direction   128,302         0
+silver.transactions   valid_ts          128,302         0

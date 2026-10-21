@@ -1,0 +1,11 @@
+# Case queue (source of the Lakebase synced table)
+  HIGH    alerts=  121  with_sar_draft=121
+  LOW     alerts= 2251  with_sar_draft=0
+  MEDIUM  alerts=   45  with_sar_draft=0
+
+Top 5 of the queue:
+  #1 e87c363b-b5fa-4db0-adef-0833c8bfdf16 R2_HIGH_RISK_COUNTRY score=0.9871 | high_risk_txn_amount (+0.16); distinct_cp_countries (+0.08); stddev_amount (+0.05)
+  #2 fa769d2f-5c22-489b-9283-fc4870127863 R2_HIGH_RISK_COUNTRY score=0.9851 | high_risk_txn_amount (+0.15); distinct_cp_countries (+0.08); stddev_amount (+0.05)
+  #3 e486a4ea-793c-4d8c-b305-8fa277eed5da R2_HIGH_RISK_COUNTRY score=0.9837 | high_risk_txn_amount (+0.17); distinct_cp_countries (+0.06); stddev_amount (+0.05)
+  #4 d949721a-abf9-4fe8-bbba-a213fa027f68 R2_HIGH_RISK_COUNTRY score=0.9801 | high_risk_txn_amount (+0.20); trigger_amount (+0.06); stddev_amount (+0.06)
+  #5 4499b1aa-c31a-441b-bae0-47368b687c24 R2_HIGH_RISK_COUNTRY score=0.98 | high_risk_txn_amount (+0.16); distinct_cp_countries (+0.08); stddev_amount (+0.05)

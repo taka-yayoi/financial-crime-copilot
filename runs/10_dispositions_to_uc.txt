@@ -1,0 +1,10 @@
+# Dispositions: Lakebase -> Unity Catalog
+new dispositions loaded this run: 5 (after disposition_id 0)
+total in serverless_stable_unstructured_catalog.aml_gold.case_dispositions: 5
+
+case_status (latest disposition per alert):
+  #1     HIGH   SAR_FILED             takaaki.yayoi@databricks.com 2026-10-21 06:08:02.273756 e87c363b-b5fa-4db0-adef-0833c8bfdf16
+  #2     HIGH   ESCALATE              takaaki.yayoi@databricks.com 2026-10-21 06:08:02.488251 fa769d2f-5c22-489b-9283-fc4870127863
+  #167   LOW    CLOSE_FALSE_POSITIVE  takaaki.yayoi@databricks.com 2026-10-21 06:08:02.861646 85803a00-084e-440b-8e6b-f0c293fe3a29
+  #168   LOW    CLOSE_FALSE_POSITIVE  takaaki.yayoi@databricks.com 2026-10-21 06:08:03.045780 fa475255-cea3-447f-a5f8-e5d896ea39e0
+  #169   LOW    CLOSE_FALSE_POSITIVE  takaaki.yayoi@databricks.com 2026-10-21 06:08:03.225297 818a8b7c-d490-4bf2-b9a5-1321d524e870

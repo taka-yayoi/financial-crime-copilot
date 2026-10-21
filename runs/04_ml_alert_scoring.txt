@@ -1,0 +1,41 @@
+=== Alert-priority model ===
+alerts (rows)      : 2,417
+suspicious (label) : 119 (4.9%)  -- legacy false-positive rate 95.1%
+train / test rows  : 1,812 / 605   (test suspicious: 30)
+
+=== Model quality (test set) ===
+ROC-AUC            : 0.985
+PR-AUC (avg prec)  : 0.894
+
+=== Workload reduction (rank alerts by model score, review top-down) ===
+review top % | alerts reviewed | suspicious caught |  recall
+         10% |              60 |                28 |   93.3%
+         20% |             121 |                29 |   96.7%
+         30% |             181 |                29 |   96.7%
+         50% |             302 |                30 |  100.0%
+
+Reviewing only the top 20% of alerts catches 97% of all suspicious cases -> ~80% of triage workload can be deprioritized.
+
+MLflow run_id      : 44423304825d434da4bfb62c4357a3e1
+Registered UC model: serverless_stable_unstructured_catalog.aml_gold.alert_priority_model  version=3  alias=@champion
+
+=== Top feature attributions (SHAP, mean |value|) ===
+shap version       : 0.54.1
+  high_risk_txn_amount             0.1373
+  stddev_amount                    0.0548
+  distinct_cp_countries            0.0491
+  trigger_amount                   0.0423
+  avg_amount                       0.0364
+  total_credit                     0.0325
+  max_amount                       0.0277
+  high_risk_txn_count              0.0219
+  total_debit                      0.0161
+  cash_credit_amount               0.0149
+  wire_txn_count                   0.0128
+  rule_code_R1_STRUCTURING         0.0109
+
+Wrote scored table : serverless_stable_unstructured_catalog.aml_gold.alert_scores (2,417 rows)
+Priority band counts:
+  LOW     2,251
+  HIGH    121
+  MEDIUM  45

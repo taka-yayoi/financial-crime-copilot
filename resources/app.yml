@@ -1,0 +1,24 @@
+# Analyst case cockpit: reads the case queue from Lakebase, writes dispositions back to
+# Lakebase, and asks the Genie Room questions on the analyst's behalf.
+resources:
+  apps:
+    fcc_cockpit:
+      name: fcc-case-cockpit
+      description: Financial Crime Copilot — analyst case cockpit
+      source_code_path: ../app
+      resources:
+        - name: postgres
+          postgres:
+            branch: projects/${var.lakebase_project}/branches/production
+            database: projects/${var.lakebase_project}/branches/production/databases/databricks-postgres
+            permission: CAN_CONNECT_AND_CREATE
+        - name: sql-warehouse
+          # Genie runs its generated SQL on the space's warehouse as the app's service principal.
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: genie-space
+          genie_space:
+            name: fcc-genie
+            space_id: ${var.genie_space_id}
+            permission: CAN_RUN

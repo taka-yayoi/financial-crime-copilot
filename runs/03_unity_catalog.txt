@@ -1,0 +1,36 @@
+# Unity Catalog governance — evidence
+current_user = takaaki.yayoi@databricks.com
+
+## national_id column mask active for current (non-analyst) user
+-- SELECT customer_id, national_id FROM serverless_stable_unstructured_catalog.aml_silver.customers ORDER BY customer_id LIMIT 3
+  {'customer_id': 1, 'national_id': 'XXX-XX-XXXX'}
+  {'customer_id': 2, 'national_id': 'XXX-XX-XXXX'}
+  {'customer_id': 3, 'national_id': 'XXX-XX-XXXX'}
+
+## governed view masks email
+-- SELECT customer_id, email, national_id FROM serverless_stable_unstructured_catalog.aml_gold.customers_governed ORDER BY customer_id LIMIT 3
+  {'customer_id': 1, 'email': 'u***@example.com', 'national_id': 'XXX-XX-XXXX'}
+  {'customer_id': 2, 'email': 'u***@example.com', 'national_id': 'XXX-XX-XXXX'}
+  {'customer_id': 3, 'email': 'u***@example.com', 'national_id': 'XXX-XX-XXXX'}
+
+## PII tags on silver.customers
+-- SELECT column_name, tag_name, tag_value FROM serverless_stable_unstructured_catalog.information_schema.column_tags
+         WHERE schema_name = 'aml_silver' AND table_name = 'customers' ORDER BY column_name
+  {'column_name': 'email', 'tag_name': 'data_sensitivity', 'tag_value': 'official_sensitive'}
+  {'column_name': 'full_name', 'tag_name': 'data_sensitivity', 'tag_value': 'official_sensitive'}
+  {'column_name': 'national_id', 'tag_name': 'pii', 'tag_value': 'ssn'}
+
+## column masks
+-- SELECT table_name, column_name, mask_name FROM serverless_stable_unstructured_catalog.information_schema.column_masks
+         WHERE table_schema = 'aml_silver'
+  {'table_name': 'customers', 'column_name': 'national_id', 'mask_name': 'serverless_stable_unstructured_catalog.aml_gold.mask_national_id'}
+
+## grants on gold schema
+-- SELECT grantee, privilege_type FROM serverless_stable_unstructured_catalog.information_schema.schema_privileges
+         WHERE schema_name = 'aml_gold' ORDER BY grantee, privilege_type
+  {'grantee': 'account users', 'privilege_type': 'SELECT'}
+  {'grantee': 'account users', 'privilege_type': 'USE_SCHEMA'}
+  {'grantee': 'aec5be3d-de3c-404c-8e60-feed0f265fd3', 'privilege_type': 'ALL_PRIVILEGES'}
+  {'grantee': 'aec5be3d-de3c-404c-8e60-feed0f265fd3', 'privilege_type': 'MANAGE'}
+  {'grantee': 'takaaki.yayoi@databricks.com', 'privilege_type': 'ALL_PRIVILEGES'}
+  {'grantee': 'takaaki.yayoi@databricks.com', 'privilege_type': 'MANAGE'}

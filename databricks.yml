@@ -1,0 +1,41 @@
+# Financial Crime Copilot — one bundle for the whole data journey.
+bundle:
+  name: financial-crime-copilot
+
+sync:
+  exclude:
+    - data_generation/raw/**
+    - runs/**
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog that holds the aml_bronze / aml_silver / aml_gold schemas
+    default: serverless_stable_unstructured_catalog
+  llm_endpoint:
+    description: Foundation Model API endpoint used for SAR drafting
+    default: databricks-claude-opus-4-8
+  warehouse_id:
+    description: SQL warehouse used by the Genie Room
+    default: ""
+  lakebase_project:
+    description: Lakebase Autoscaling project created by lakebase/setup_lakebase.sh
+    default: fcc-case-queue
+  genie_space_id:
+    description: Genie Room created by genie/deploy_space.sh
+    default: ""
+  case_queue_sync_pipeline_id:
+    description: Pipeline behind the Lakebase synced table (status.pipeline_id from lakebase/setup_lakebase.sh sync)
+    default: ""
+
+targets:
+  dev:
+    mode: development
+    default: true
+    # Workspace comes from the CLI profile: databricks bundle deploy --profile <profile>
+    variables:
+      warehouse_id: 29bda207b5e49522
+      genie_space_id: 01f1cd0ee1f81c8ca69d9cfe6fbee5fd
+      case_queue_sync_pipeline_id: 1042367e-e953-46e7-9d5c-b1f188799e9a

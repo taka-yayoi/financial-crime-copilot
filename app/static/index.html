@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Financial Crime Copilot — Case Cockpit</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1b1f24; --muted:#5f6b7a; --line:#dde2e8;
+          --high:#b42318; --med:#b54708; --low:#3b6e3b; --accent:#1f5fbf; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:14px 24px; background:var(--card); border-bottom:1px solid var(--line); }
+  header h1 { margin:0; font-size:18px; } header p { margin:2px 0 0; color:var(--muted); }
+  main { display:grid; grid-template-columns: 1.15fr 1fr; gap:16px; padding:16px 24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; }
+  .kpis { grid-column:1/3; display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+  .kpi .v { font-size:24px; font-weight:600; } .kpi .l { color:var(--muted); font-size:12px; }
+  table { width:100%; border-collapse:collapse; } th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:500; font-size:12px; } tr.row { cursor:pointer; } tr.row:hover { background:#eef3fb; }
+  tr.sel { background:#e3ecfa; }
+  .band { font-weight:600; font-size:12px; } .HIGH { color:var(--high); } .MEDIUM { color:var(--med); } .LOW { color:var(--low); }
+  .muted { color:var(--muted); } h2 { font-size:15px; margin:0 0 10px; }
+  textarea { width:100%; min-height:200px; font:13px/1.4 ui-monospace,Menlo,monospace; border:1px solid var(--line); border-radius:6px; padding:8px; }
+  button { border:1px solid var(--line); background:#fff; border-radius:6px; padding:6px 12px; cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .genie { grid-column:1/3; } .genie input { width:80%; padding:7px; border:1px solid var(--line); border-radius:6px; }
+  pre { white-space:pre-wrap; background:#f3f4f6; padding:8px; border-radius:6px; font-size:12px; }
+  select { padding:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Financial Crime Copilot — Analyst Case Cockpit</h1>
+  <p>Rule-based alerts ranked by the alert-priority model. Work the queue top-down; every SAR is a draft until an analyst files it.</p>
+</header>
+<main>
+  <section class="kpis" id="kpis"></section>
+
+  <section class="card">
+    <h2>Case queue <select id="band" onchange="loadQueue()">
+      <option value="">all bands</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></h2>
+    <table><thead><tr><th>#</th><th>Priority</th><th>Rule</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody id="queue"></tbody></table>
+  </section>
+
+  <section class="card" id="detail"><h2>Case detail</h2><p class="muted">Select a case from the queue.</p></section>
+
+  <section class="card genie">
+    <h2>Ask Genie (natural-language investigation)</h2>
+    <input id="q" placeholder="e.g. Which rules produce the most false positives this quarter?">
+    <button class="primary" onclick="ask()">Ask</button>
+    <div id="answer"></div>
+  </section>
+</main>
+<script>
+const fmt = n => n == null ? "" : Number(n).toLocaleString(undefined, {maximumFractionDigits: 2});
+const esc = s => (s ?? "").toString().replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let current = null, conversation = null;
+
+async function loadKpis() {
+  const k = await (await fetch("/api/kpis")).json();
+  const items = [["alerts_total","Alerts in queue"],["high_priority","High priority"],["high_untouched","High, not yet worked"],
+                 ["escalated","Escalated"],["sar_filed","SARs filed"],["closed_false_positive","Closed as false positive"]];
+  document.getElementById("kpis").innerHTML = items.map(([key,label]) =>
+    `<div class="card kpi"><div class="v">${fmt(k[key])}</div><div class="l">${label}</div></div>`).join("");
+}
+async function loadQueue() {
+  const band = document.getElementById("band").value;
+  const rows = await (await fetch(`/api/queue?limit=40${band ? "&band=" + band : ""}`)).json();
+  document.getElementById("queue").innerHTML = rows.map(r => `
+    <tr class="row ${current === r.alert_id ? "sel" : ""}" onclick="openCase('${r.alert_id}')">
+      <td>${r.priority_rank}</td><td><span class="band ${r.priority_band}">${r.priority_band}</span> ${fmt(r.priority_score)}</td>
+      <td>${esc(r.rule_code)}</td><td>${esc(r.customer_name)}${r.is_pep ? " (PEP)" : ""}</td>
+      <td>$${fmt(r.trigger_amount)}</td><td>${esc(r.status || "new")}</td></tr>`).join("");
+}
+async function openCase(id) {
+  current = id;
+  const c = await (await fetch(`/api/case/${id}`)).json();
+  document.getElementById("detail").innerHTML = `
+    <h2>Case #${c.priority_rank} <span class="band ${c.priority_band}">${c.priority_band}</span> score ${fmt(c.priority_score)}</h2>
+    <p><b>${esc(c.customer_name)}</b> · ${esc(c.customer_country)} · KYC ${esc(c.kyc_risk_rating)}${c.is_pep ? " · PEP" : ""}<br>
+       Rule ${esc(c.rule_code)} · account ${c.account_id} · trigger $${fmt(c.trigger_amount)} · ${esc(c.alert_ts)}</p>
+    <p><b>Why it ranked here (SHAP):</b> ${esc(c.top_reasons || "n/a")}</p>
+    ${c.analyst_rationale ? `<p><b>AI rationale:</b> ${esc(c.analyst_rationale)}</p>` : ""}
+    <p><b>SAR narrative</b> <span class="muted">(AI draft — review and edit before filing)</span></p>
+    <textarea id="sar">${esc(c.sar_draft || "")}</textarea>
+    <input id="note" placeholder="Analyst note" style="width:100%;margin-top:8px;padding:6px;border:1px solid var(--line);border-radius:6px">
+    <div class="actions">
+      <button class="primary" onclick="act('SAR_FILED')">File SAR</button>
+      <button onclick="act('ESCALATE')">Escalate</button>
+      <button onclick="act('CLOSE_FALSE_POSITIVE')">Close as false positive</button>
+    </div>
+    <p class="muted">${(c.history || []).map(h => `${esc(h.created_at)} ${esc(h.action)} by ${esc(h.analyst)} ${esc(h.note || "")}`).join("<br>")}</p>`;
+  loadQueue();
+}
+async function act(action) {
+  const body = {action, note: document.getElementById("note").value || null,
+                sar_narrative: action === "SAR_FILED" ? document.getElementById("sar").value : null};
+  const r = await fetch(`/api/case/${current}/disposition`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  if (!r.ok) { alert(await r.text()); return; }
+  await openCase(current); loadKpis();
+}
+async function ask() {
+  const question = document.getElementById("q").value; if (!question) return;
+  document.getElementById("answer").innerHTML = `<p class="muted">Genie is thinking…</p>`;
+  const r = await (await fetch("/api/genie", {method:"POST", headers:{"Content-Type":"application/json"},
+                   body:JSON.stringify({question, conversation_id: conversation})})).json();
+  conversation = r.conversation_id;
+  const table = r.columns && r.columns.length ? `<table><thead><tr>${r.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+     <tbody>${r.rows.map(row => `<tr>${row.map(v => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>` : "";
+  document.getElementById("answer").innerHTML = `<p>${esc(r.text || r.detail || "")}</p>${table}${r.sql ? `<pre>${esc(r.sql)}</pre>` : ""}`;
+}
+loadKpis(); loadQueue();
+</script>
+</body>
+</html>

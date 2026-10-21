@@ -1,0 +1,14 @@
+=== Financial Crime Copilot — synthetic data generated ===
+seed=42  output=data_generation/raw
+customers      :    2,000  (bad actors: 100, PEPs: 72)
+accounts       :    3,011
+transactions   :  128,302
+alerts         :    2,417
+  suspicious   :      119  (ground truth)
+  false-pos    :    2,298  => false-positive rate 95.1%
+alerts by rule :
+  R1_STRUCTURING         total=   412  suspicious=   22  precision=  5.3%
+  R2_HIGH_RISK_COUNTRY   total= 1,474  suspicious=   74  precision=  5.0%
+  R3_RAPID_MOVEMENT      total=   325  suspicious=   21  precision=  6.5%
+  R4_HIGH_VELOCITY       total=   191  suspicious=    0  precision=  0.0%
+  R5_PEP_ACTIVITY        total=    15  suspicious=    2  precision= 13.3%

@@ -1,0 +1,47 @@
+# End-to-end orchestration: ingest -> govern -> ML score -> GenAI draft -> case queue.
+resources:
+  jobs:
+    fcc_end_to_end:
+      name: fcc_end_to_end
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: llm_endpoint
+          default: ${var.llm_endpoint}
+      tasks:
+        - task_key: lakeflow_ingest
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.aml_ingest.id}
+            full_refresh: false
+        - task_key: unity_catalog_governance
+          depends_on: [{ task_key: lakeflow_ingest }]
+          notebook_task: { notebook_path: ../notebooks/02_unity_catalog_governance.py }
+        - task_key: ml_alert_scoring
+          depends_on: [{ task_key: unity_catalog_governance }]
+          notebook_task: { notebook_path: ../notebooks/03_ml_alert_scoring.py }
+        - task_key: genai_sar_drafts
+          depends_on: [{ task_key: ml_alert_scoring }]
+          notebook_task: { notebook_path: ../notebooks/04_genai_sar.py }
+        - task_key: build_case_queue
+          depends_on: [{ task_key: genai_sar_drafts }]
+          notebook_task: { notebook_path: ../notebooks/05_case_queue.py }
+        - task_key: sync_to_lakebase
+          depends_on: [{ task_key: build_case_queue }]
+          # Refreshes the Lakebase synced table (UC gold.case_queue -> Lakebase aml_serving.case_queue).
+          pipeline_task:
+            pipeline_id: ${var.case_queue_sync_pipeline_id}
+
+    fcc_dispositions_to_uc:
+      name: fcc_dispositions_to_uc
+      # Lands analyst dispositions from Lakebase back in Unity Catalog every 15 minutes.
+      schedule:
+        quartz_cron_expression: "0 0/15 * * * ?"
+        timezone_id: UTC
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: lakebase_endpoint
+          default: projects/${var.lakebase_project}/branches/production/endpoints/primary
+      tasks:
+        - task_key: dispositions_to_uc
+          notebook_task: { notebook_path: ../notebooks/06_dispositions_to_uc.py }

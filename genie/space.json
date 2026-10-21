@@ -1,0 +1,140 @@
+{
+  "version": 2,
+  "config": {
+    "sample_questions": [
+      {
+        "id": "00000000000000000000000000000100",
+        "question": [
+          "Which rules generate the most false positives?"
+        ]
+      },
+      {
+        "id": "00000000000000000000000000000101",
+        "question": [
+          "How many high-priority alerts are still open?"
+        ]
+      },
+      {
+        "id": "00000000000000000000000000000102",
+        "question": [
+          "Show the top 10 open cases for PEP customers"
+        ]
+      },
+      {
+        "id": "00000000000000000000000000000103",
+        "question": [
+          "How many SARs have analysts filed so far, and for which rules?"
+        ]
+      }
+    ]
+  },
+  "data_sources": {
+    "tables": [
+      {
+        "identifier": "serverless_stable_unstructured_catalog.aml_gold.alert_kpis",
+        "description": [
+          "Daily alert volume by transaction-monitoring rule, with historically confirmed suspicious cases and the false-positive rate."
+        ]
+      },
+      {
+        "identifier": "serverless_stable_unstructured_catalog.aml_gold.case_queue",
+        "description": [
+          "One row per rule-based alert, ranked by the ML alert-priority model (priority_rank 1 = work first), with SHAP risk drivers and the GenAI SAR draft."
+        ],
+        "column_configs": [
+          {
+            "column_name": "priority_band",
+            "enable_format_assistance": true,
+            "enable_entity_matching": true,
+            "synonyms": [
+              "risk band",
+              "priority"
+            ]
+          },
+          {
+            "column_name": "rule_code",
+            "enable_format_assistance": true,
+            "enable_entity_matching": true,
+            "synonyms": [
+              "rule",
+              "scenario",
+              "TM rule"
+            ]
+          },
+          {
+            "column_name": "sar_draft",
+            "exclude": true
+          }
+        ]
+      },
+      {
+        "identifier": "serverless_stable_unstructured_catalog.aml_gold.case_status",
+        "description": [
+          "Latest analyst disposition per alert, written in the case cockpit (Lakebase) and streamed back to Unity Catalog. Alerts with no row here have not been worked yet."
+        ],
+        "column_configs": [
+          {
+            "column_name": "action",
+            "enable_format_assistance": true,
+            "enable_entity_matching": true,
+            "synonyms": [
+              "disposition",
+              "status",
+              "outcome"
+            ]
+          }
+        ]
+      },
+      {
+        "identifier": "serverless_stable_unstructured_catalog.aml_gold.customers_governed",
+        "description": [
+          "Customer master with PII masked by Unity Catalog for non-privileged users."
+        ]
+      }
+    ]
+  },
+  "instructions": {
+    "text_instructions": [
+      {
+        "id": "00000000000000000000000000000300",
+        "content": [
+          "This room supports AML investigators and the Head of Financial Crime at a commercial bank.\n",
+          "Alerts come from a legacy rules-based transaction-monitoring system; most are false positives.\n",
+          "priority_score is the model's probability that an alert is genuinely suspicious; priority_band is HIGH (>0.6), MEDIUM (0.3-0.6) or LOW (<0.3). priority_rank 1 is the most urgent case.\n",
+          "Analyst work status comes from case_status.action: ESCALATE, SAR_FILED or CLOSE_FALSE_POSITIVE. An alert is 'open' when it has no case_status row or its action is ESCALATE.\n",
+          "False-positive rate = 1 - suspicious / alerts, from alert_kpis. Report percentages to one decimal.\n",
+          "Never show national IDs or full email addresses; use customers_governed for customer attributes.\n"
+        ]
+      }
+    ],
+    "example_question_sqls": [
+      {
+        "id": "00000000000000000000000000000200",
+        "question": [
+          "Which rules generate the most false positives?"
+        ],
+        "sql": [
+          "SELECT rule_code, SUM(alerts) AS alerts, SUM(suspicious) AS suspicious, ROUND(100.0 * (1 - SUM(suspicious) / SUM(alerts)), 1) AS false_positive_pct FROM serverless_stable_unstructured_catalog.aml_gold.alert_kpis GROUP BY rule_code ORDER BY alerts - suspicious DESC"
+        ]
+      },
+      {
+        "id": "00000000000000000000000000000201",
+        "question": [
+          "How many high-priority alerts are still open?"
+        ],
+        "sql": [
+          "SELECT COUNT(*) AS open_high_priority FROM serverless_stable_unstructured_catalog.aml_gold.case_queue q LEFT JOIN serverless_stable_unstructured_catalog.aml_gold.case_status s ON q.alert_id = s.alert_id WHERE q.priority_band = 'HIGH' AND (s.action IS NULL OR s.action = 'ESCALATE')"
+        ]
+      },
+      {
+        "id": "00000000000000000000000000000202",
+        "question": [
+          "Show analyst dispositions by outcome"
+        ],
+        "sql": [
+          "SELECT action, COUNT(*) AS cases FROM serverless_stable_unstructured_catalog.aml_gold.case_status GROUP BY action ORDER BY cases DESC"
+        ]
+      }
+    ]
+  }
+}

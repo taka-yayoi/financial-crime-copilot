@@ -1,0 +1,37 @@
+# Lakebase (operational serving) — evidence
+Project fcc-case-queue (Lakebase Autoscaling, Postgres 17), branch production, database databricks_postgres
+
+## Synced table UC gold.case_queue -> Lakebase aml_serving.case_queue (SNAPSHOT, refreshed by job task sync_to_lakebase)
+state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE  pipeline_id=1042367e-e953-46e7-9d5c-b1f188799e9a
+last sync 2026-10-21T06:18:45.085450Z -> 2026-10-21T06:18:54.814775Z (source Delta version 2, committed 2026-10-21T06:18:20.686Z by job run 887107306612211)
+
+## Postgres (psql) — synced queue and app-owned dispositions table
+# Dispositions 1-5 were entered through the app API (runs/08_app.txt) as demo analyst actions.
+ priority_band | alerts | with_sar_draft 
+---------------+--------+----------------
+ HIGH          |    121 |            121
+ LOW           |   2251 |              0
+ MEDIUM        |     45 |              0
+(3 rows)
+
+ priority_rank |               alert_id               | priority_score |                                    top_reasons                                     
+---------------+--------------------------------------+----------------+------------------------------------------------------------------------------------
+             1 | e87c363b-b5fa-4db0-adef-0833c8bfdf16 |         0.9871 | high_risk_txn_amount (+0.16); distinct_cp_countries (+0.08); stddev_amount (+0.05)
+             2 | fa769d2f-5c22-489b-9283-fc4870127863 |         0.9851 | high_risk_txn_amount (+0.15); distinct_cp_countries (+0.08); stddev_amount (+0.05)
+             3 | e486a4ea-793c-4d8c-b305-8fa277eed5da |         0.9837 | high_risk_txn_amount (+0.17); distinct_cp_countries (+0.06); stddev_amount (+0.05)
+(3 rows)
+
+ disposition_id |               alert_id               |        action        |           analyst            |                               note                               |          created_at           
+----------------+--------------------------------------+----------------------+------------------------------+------------------------------------------------------------------+-------------------------------
+              1 | e87c363b-b5fa-4db0-adef-0833c8bfdf16 | SAR_FILED            | takaaki.yayoi@databricks.com | Reviewed AI draft; confirmed layering pattern across 7 countries | 2026-10-21 06:08:02.273756+00
+              2 | fa769d2f-5c22-489b-9283-fc4870127863 | ESCALATE             | takaaki.yayoi@databricks.com | Request source-of-funds documentation from relationship manager  | 2026-10-21 06:08:02.488251+00
+              3 | 85803a00-084e-440b-8e6b-f0c293fe3a29 | CLOSE_FALSE_POSITIVE | takaaki.yayoi@databricks.com | Benign: recurring payroll pattern                                | 2026-10-21 06:08:02.861646+00
+              4 | fa475255-cea3-447f-a5f8-e5d896ea39e0 | CLOSE_FALSE_POSITIVE | takaaki.yayoi@databricks.com | Benign: recurring payroll pattern                                | 2026-10-21 06:08:03.04578+00
+              5 | 818a8b7c-d490-4bf2-b9a5-1321d524e870 | CLOSE_FALSE_POSITIVE | takaaki.yayoi@databricks.com | Benign: recurring payroll pattern                                | 2026-10-21 06:08:03.225297+00
+(5 rows)
+
+      relname      | replica_identity 
+-------------------+------------------
+ case_dispositions | full
+(1 row)
+
