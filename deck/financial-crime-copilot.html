@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Financial Crime Copilot — business deck</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root { --ink:#1b1f24; --muted:#5a6573; --line:#d9dee5; --accent:#1f5fbf; --good:#2f6b3a; --warn:#a33a1f; --bg:#f5f7fa; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#c9ced6; font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); }
+  section { width:1280px; height:720px; margin:24px auto; background:#fff; padding:56px 72px; position:relative;
+            page-break-after:always; break-after:page; overflow:hidden; }
+  @media print { body { background:#fff; } section { margin:0; } }
+  h1 { font-size:46px; line-height:1.15; margin:0 0 18px; }
+  h2 { font-size:34px; line-height:1.2; margin:0 0 26px; }
+  p, li, td, th { font-size:21px; line-height:1.45; }
+  .kicker { font-size:18px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:12px; }
+  .muted { color:var(--muted); }
+  .foot { position:absolute; left:72px; right:72px; bottom:28px; font-size:15px; color:var(--muted); display:flex; justify-content:space-between; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .card { border:1px solid var(--line); border-radius:10px; padding:20px 22px; background:#fff; }
+  .card h3 { font-size:22px; margin:0 0 8px; }
+  .big { font-size:52px; font-weight:700; line-height:1.05; }
+  .big.accent { color:var(--accent); } .big.good { color:var(--good); } .big.warn { color:var(--warn); }
+  .label { font-size:18px; color:var(--muted); margin-top:6px; }
+  ul { margin:0; padding-left:26px; } li { margin:6px 0; }
+  table { border-collapse:collapse; width:100%; }
+  th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:18px; color:var(--muted); font-weight:600; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  tr.total td { font-weight:700; border-top:2px solid var(--ink); }
+  .flow { display:flex; align-items:stretch; gap:10px; margin-top:8px; }
+  .step { flex:1; border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--bg); }
+  .step b { display:block; font-size:19px; margin-bottom:6px; color:var(--accent); }
+  .step span { font-size:18px; line-height:1.35; display:block; }
+  .arrow { align-self:center; font-size:26px; color:var(--muted); }
+  .title { background:linear-gradient(135deg,#0f2747,#1f5fbf); color:#fff; }
+  .title .kicker { color:#b9cdf0; } .title .muted { color:#d6e1f5; } .title .foot { color:#b9cdf0; }
+  .pill { display:inline-block; font-size:16px; padding:3px 10px; border-radius:999px; background:#e7eefb; color:var(--accent); margin-right:6px; }
+  .layer { display:grid; grid-template-columns:200px 1fr; gap:6px 18px; align-items:start; }
+  .layer div { font-size:19px; line-height:1.35; padding:7px 0; border-bottom:1px solid var(--line); }
+  .layer div:nth-child(odd) { font-weight:600; color:var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- 1. Title: the outcome first -->
+<section class="title">
+  <div class="kicker">Financial Crime Copilot · AML alert triage</div>
+  <h1 style="font-size:54px;max-width:1020px">Cut AML alert-triage cost by an estimated $2.1M a year — without changing the rules your regulator already trusts</h1>
+  <p class="muted" style="font-size:24px;max-width:980px;margin-top:26px">For the Chief Compliance Officer and the Head of the Financial Intelligence Unit of a mid-size commercial bank</p>
+  <div class="foot"><span>Takaaki Yayoi · Databricks</span><span>All figures in this deck come from a working prototype on synthetic data, or from the stated assumptions</span></div>
+</section>
+
+<!-- 2. The problem in the buyer's terms -->
+<section>
+  <div class="kicker">The problem today</div>
+  <h2>Analysts spend almost all of their time clearing alerts that turn out to be nothing</h2>
+  <div class="grid3">
+    <div class="card"><div class="big warn">95%</div><div class="label">of rule-based alerts are false positives (95.1% in the prototype's alert population of 2,417)</div></div>
+    <div class="card"><div class="big warn">30 min</div><div class="label">of manual triage per alert, in arrival order, no matter how likely it is to matter (value-case assumption)</div></div>
+    <div class="card"><div class="big warn">2 hrs</div><div class="label">to write each Suspicious Activity Report (SAR), with quality that varies by analyst (value-case assumption)</div></div>
+  </div>
+  <div class="grid2" style="margin-top:30px">
+    <div><p><b>For the CCO:</b> rising labor cost, a growing backlog and regulatory SLA risk. Adding analysts scales cost linearly.</p></div>
+    <div><p><b>For the Head of FIU:</b> genuinely suspicious cases wait in the same queue as noise; experienced investigators spend hours on paperwork.</p></div>
+  </div>
+  <div class="foot"><span>Financial Crime Copilot</span><span>2</span></div>
+</section>
+
+<!-- 3. What changes -->
+<section>
+  <div class="kicker">What changes</div>
+  <h2>Keep every rule and every alert — change which alerts analysts work first, and how fast a SAR gets written</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Prioritized queue with reasons</h3>
+      <p>A model scores each alert by how likely it is to be genuinely suspicious. Analysts work top-down; each case shows the three factors that ranked it high.</p>
+    </div>
+    <div class="card">
+      <h3>SAR draft in seconds, filed by a human</h3>
+      <p>For every high-priority case a regulator-style SAR draft is ready. The analyst reviews, edits and files it — nothing is filed automatically.</p>
+    </div>
+    <div class="card">
+      <h3>One cockpit for the analyst</h3>
+      <p>Queue, case detail, SAR editor and disposition buttons in a single app; every decision is recorded with who made it and when.</p>
+    </div>
+    <div class="card">
+      <h3>Answers in plain English for managers</h3>
+      <p>"How many high-priority alerts are still open?" — answered from the same governed data the analysts work on, with the query shown.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Financial Crime Copilot</span><span>3</span></div>
+</section>
+
+<!-- 4. The value -->
+<section>
+  <div class="kicker">The value</div>
+  <h2>≈ $2.1M per year in analyst capacity, from two levers</h2>
+  <table>
+    <tr><th>Lever</th><th>Assumption</th><th class="num">Hours / yr</th><th class="num">Value / yr</th></tr>
+    <tr><td>Alert triage</td><td>100k alerts × 30 min = 50k hrs; <b>40%</b> of that effort removed by working the prioritized queue</td><td class="num">20,000</td><td class="num">$1.5M</td></tr>
+    <tr><td>SAR drafting</td><td>5k SARs; writing ~2 hrs → reviewing a draft ~20 min</td><td class="num">8,333</td><td class="num">$0.6M</td></tr>
+    <tr class="total"><td>Total</td><td>Loaded analyst cost $75 / hour</td><td class="num">28,333</td><td class="num">≈ $2.1M</td></tr>
+  </table>
+  <p style="margin-top:22px"><b>Why 40% is conservative:</b> in the prototype, reviewing only the top 20% of the ranked queue already caught 96.7% of the suspicious cases (next slide) — so 80% of alerts could wait. We count only a 40% cut in triage effort.</p>
+  <p class="muted">Not counted: lower regulatory-fine exposure, faster alert-to-SAR cycle time, consistent SAR structure. Your volumes and costs replace these assumptions in the business case.</p>
+  <div class="foot"><span>Financial Crime Copilot</span><span>4</span></div>
+</section>
+
+<!-- 5. Proof -->
+<section>
+  <div class="kicker">Proof from the working prototype</div>
+  <h2>On held-out alerts the model put almost every suspicious case at the top of the queue</h2>
+  <div class="grid3">
+    <div class="card"><div class="big good">96.7%</div><div class="label">of suspicious cases caught by reviewing only the top 20% of the queue (29 of 30, held-out test set of 605 alerts)</div></div>
+    <div class="card"><div class="big good">0.985</div><div class="label">ROC-AUC on the held-out set (PR-AUC 0.894) — against a 4.9% base rate of suspicious alerts</div></div>
+    <div class="card"><div class="big accent">121 / 121</div><div class="label">high-priority cases with a SAR draft and a one-line rationale ready for the analyst</div></div>
+  </div>
+  <table style="margin-top:28px">
+    <tr><th>Review the top …</th><th class="num">10%</th><th class="num">20%</th><th class="num">30%</th><th class="num">50%</th></tr>
+    <tr><td>… and you catch this share of suspicious cases</td><td class="num">93.3%</td><td class="num">96.7%</td><td class="num">96.7%</td><td class="num">100%</td></tr>
+  </table>
+  <p class="muted" style="margin-top:16px">Synthetic data with known laundering typologies (structuring, rapid movement, high-risk-country wires, PEP activity). A pilot on your alert history confirms the numbers before any rollout decision.</p>
+  <div class="foot"><span>Financial Crime Copilot</span><span>5</span></div>
+</section>
+
+<!-- 6. A day in the analyst's life -->
+<section>
+  <div class="kicker">How the analyst works</div>
+  <h2>From alert to filed SAR in one place</h2>
+  <div class="flow">
+    <div class="step"><b>1 · Open the queue</b><span>Alerts ranked by priority; the highest-risk case is first, whenever it arrived.</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>2 · See why</b><span>"High-risk-country amount, number of counterparty countries, amount volatility."</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>3 · Review the draft</b><span>Edit the AI-drafted SAR narrative instead of starting from a blank page.</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>4 · Decide</b><span>File SAR, escalate, or close as false positive — recorded instantly.</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>5 · Managers ask</b><span>Open cases, SARs filed by rule, false-positive rates — in plain English.</span></div>
+  </div>
+  <p style="margin-top:30px"><b>KPIs this moves:</b> cost per alert · alerts handled per analyst per day · alert-to-SAR cycle time · SAR quality consistency · regulatory SLA adherence</p>
+  <div class="foot"><span>Financial Crime Copilot</span><span>6</span></div>
+</section>
+
+<!-- 7. Risk and control -->
+<section>
+  <div class="kicker">Why it is safe to adopt</div>
+  <h2>Designed for the regulator's questions, not around them</h2>
+  <table>
+    <tr><th style="width:36%">Question you will be asked</th><th>How the design answers it</th></tr>
+    <tr><td>Could the model hide a true positive?</td><td>No alert is removed or auto-closed. The rules still raise every alert; the model only sets the order.</td></tr>
+    <tr><td>Who is accountable for a SAR?</td><td>The analyst. AI drafts; a person reviews, edits and files.</td></tr>
+    <tr><td>Can you explain a ranking to an examiner?</td><td>Every score ships with its top contributing factors, shown on the case screen.</td></tr>
+    <tr><td>Who can see customer PII?</td><td>National IDs and e-mails are masked centrally for anyone outside the authorized analyst group.</td></tr>
+    <tr><td>Is there an audit trail?</td><td>Every disposition is stored with analyst and timestamp, and lands in the governed analytics layer.</td></tr>
+  </table>
+  <div class="foot"><span>Financial Crime Copilot</span><span>7</span></div>
+</section>
+
+<!-- 8. Architecture (for the technical stakeholder) -->
+<section>
+  <div class="kicker">For the architect</div>
+  <h2>One governed data flow on Databricks, not six tools</h2>
+  <div class="layer">
+    <div>Lakeflow</div><div>Declarative pipeline ingests raw files: bronze → silver (data-quality expectations) → gold features</div>
+    <div>Unity Catalog</div><div>Column masks, PII tags, governed views, grants and lineage across every table below</div>
+    <div>ML</div><div>Alert-priority model tracked in MLflow, registered in Unity Catalog, SHAP explanations per alert</div>
+    <div>Gen AI</div><div>SAR drafts and rationale generated in SQL with a Foundation Model API (ai_query)</div>
+    <div>Lakebase</div><div>Postgres serving: synced case queue for the app; analyst dispositions written transactionally, then landed back in Unity Catalog</div>
+    <div>Genie Room</div><div>Natural-language questions over the queue, dispositions and KPIs — also available inside the app</div>
+    <div>Databricks App</div><div>Analyst case cockpit on the platform: reads and writes through governed resources, and records the signed-in analyst on every disposition</div>
+  </div>
+  <p class="muted" style="margin-top:14px">Code, configuration and execution logs for every layer are in the repository.</p>
+  <div class="foot"><span>Financial Crime Copilot</span><span>8</span></div>
+</section>
+
+<!-- 9. Path to value -->
+<section>
+  <div class="kicker">Proposed path to value</div>
+  <h2>Prove it on your own alert history before anything changes for analysts</h2>
+  <div class="grid3">
+    <div class="card"><span class="pill">Step 1</span><h3 style="margin-top:10px">Back-test</h3><p>Score 12 months of your closed alerts. Measure how many confirmed SARs fall in the top of the queue.</p></div>
+    <div class="card"><span class="pill">Step 2</span><h3 style="margin-top:10px">Shadow mode</h3><p>Run alongside today's process; analysts keep working as they do, we compare rankings and draft quality.</p></div>
+    <div class="card"><span class="pill">Step 3</span><h3 style="margin-top:10px">One team live</h3><p>One analyst team works the prioritized queue; track cost per alert and cycle time against the baseline.</p></div>
+  </div>
+  <p style="margin-top:28px"><b>Decision we are asking for:</b> approve the back-test on historical alerts, with your model-risk and compliance teams defining the success threshold up front.</p>
+  <div class="foot"><span>Financial Crime Copilot</span><span>9</span></div>
+</section>
+
+</body>
+</html>
